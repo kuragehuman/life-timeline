@@ -54,3 +54,27 @@ body {
   justify-content: center;
   color: #fff;
 }
+
+/* カード */
+.card {
+  position: absolute;
+
+  width: 62px;
+  height: 34px;
+
+  background: #4dabf7;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+}
+
+/* ドラッグ中の見た目 */
+.card:active {
+  cursor: grabbing;
+}
