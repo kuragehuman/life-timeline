@@ -1,0 +1,56 @@
+/* ===== 全体 ===== */
+body {
+  margin: 0;
+  background: #0f111a;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.container {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+/* タイトル */
+.title {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+/* ===== グリッド ===== */
+.grid {
+  display: block;
+}
+
+/* 行 */
+.row {
+  display: grid;
+  grid-template-columns: 80px repeat(48, 64px); /* ← 広げた */
+}
+
+/* ===== セル ===== */
+.cell {
+  width: 64px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.25); /* ← 白線 */
+  box-sizing: border-box;
+}
+
+/* ===== 曜日 ===== */
+.day {
+  width: 80px;
+  font-size: 14px;
+  padding: 6px;
+
+
+  box-sizing: border-box;
+}
+
+/* ===== ヘッダー（時間） ===== */
+.header-cell {
+  font-size: 12px; /* ← 大きく */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
