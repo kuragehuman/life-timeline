@@ -1,60 +1,95 @@
-import customtkinter as ctk
-
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("blue")
+# life_timeline.py
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-class TimeTableApp(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+# ===== 初期化 =====
+def create_grid():
+    return [
+        [
+            {"event": "~~~~", "type": -1}
+            for _ in range(24)
+        ]
+        for _ in range(7)
+    ]
 
-        self.title("Time Table")
-        self.geometry("1200x600")
+grid = create_grid()
 
-        # メインフレーム
-        self.grid_frame = ctk.CTkFrame(self)
-        self.grid_frame.pack(fill="both", expand=True, padx=10, pady=10)
+# ===== 追加処理 =====
+def add_event(day_str, start, end, name, type_):
+    if day_str not in DAYS:
+        print("曜日が不正です")
+        return
 
-        self.create_grid()
+    day_index = DAYS.index(day_str)
 
-    def create_grid(self):
-        # 左上空白
-        ctk.CTkLabel(self.grid_frame, text="").grid(row=0, column=0)
+    try:
+        start = int(start)
+        end = int(end)
+    except:
+        print("時間は整数で入力してね")
+        return
 
-        # 時間（横）
-        for hour in range(24):
-            label = ctk.CTkLabel(self.grid_frame, text=str(hour))
-            label.grid(row=0, column=hour + 1, padx=2, pady=2)
+    if not (0 <= start < 24 and 0 < end <= 24 and start < end):
+        print("時間の範囲がおかしい")
+        return
 
-        # 曜日（縦） + マス
-        self.cells = {}
+    for h in range(start, end):
+        grid[day_index][h]["event"] = name
+        grid[day_index][h]["type"] = type_
 
-        for r, day in enumerate(DAYS):
-            # 曜日ラベル
-            ctk.CTkLabel(self.grid_frame, text=day).grid(row=r + 1, column=0)
+    print(f"{day_str} {start}-{end} に '{name}' ({type_}) を追加")
 
-            for c in range(24):
-                frame = ctk.CTkFrame(self.grid_frame, width=40, height=30)
-                frame.grid(row=r + 1, column=c + 1, padx=1, pady=1)
-                frame.grid_propagate(False)
+# ===== 表示 =====
+def print_grid():
+    # ヘッダー
+    header = "     " + "".join([f"{h:>3}" for h in range(24)])
+    print(header)
+    print("    " + "---" * 24)
 
-                # クリックで仮カード追加
-                frame.bind("<Button-1>", lambda e, d=day, h=c: self.add_card(d, h))
+    for d, day in enumerate(DAYS):
+        row = f"{day:>3} |"
+        for h in range(24):
+            val = grid[d][h]["event"]
 
-                self.cells[(day, c)] = frame
+            # 表示短縮（長いと崩れる）
+            if val == "~~~~":
+                cell = " . "
+            else:
+                cell = f"{val[:2]:>2} "
 
-    def add_card(self, day, hour):
-        frame = self.cells[(day, hour)]
+            row += cell
 
-        # 既存を消す（簡易）
-        for widget in frame.winfo_children():
-            widget.destroy()
+        print(row)
 
-        label = ctk.CTkLabel(frame, text="Task", fg_color="green", corner_radius=5)
-        label.pack(fill="both", expand=True, padx=2, pady=2)
+# ===== コマンド処理 =====
+def run():
+    print("コマンドを入力してね")
+    print("add Mon 9 12 work study")
+    print("print")
+    print("exit")
 
+    while True:
+        cmd = input(">>> ").strip()
 
+        if cmd == "exit":
+            break
+
+        elif cmd == "print":
+            print_grid()
+
+        elif cmd.startswith("add"):
+            parts = cmd.split()
+
+            if len(parts) < 6:
+                print("形式: add Mon 9 12 work study")
+                continue
+
+            _, day, start, end, name, type_ = parts[:6]
+            add_event(day, start, end, name, type_)
+
+        else:
+            print("不明なコマンド")
+
+# ===== 実行 =====
 if __name__ == "__main__":
-    app = TimeTableApp()
-    app.mainloop()
+    run()
