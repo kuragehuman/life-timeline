@@ -52,6 +52,10 @@ class GridWindow(QTableWidget):
 
         self.setEditTriggers(QTableWidget.NoEditTriggers)
 
+        # ===== ドラッグ用 =====
+        self.dragging = False
+        self.erase_mode = False
+
         self.refresh()
 
         # シグナル
@@ -68,23 +72,70 @@ class GridWindow(QTableWidget):
 
                 item = QTableWidgetItem(text)
                 item.setTextAlignment(Qt.AlignCenter)
-
-                # 色
                 item.setBackground(TYPE_COLORS.get(t, QColor("#ffffff")))
 
                 self.setItem(d, h, item)
 
+    # ===== クリック =====
     def handle_click(self, row, col):
+        self.apply_cell(row, col)
+
+    # ===== 共通処理 =====
+    def apply_cell(self, row, col):
         parent = self.parent()
 
-        if parent.current_type is None:
-            print("タイプ選択してね")
-            return
-
-        grid[row][col]["event"] = parent.current_type
-        grid[row][col]["type"] = parent.current_type
+        if self.erase_mode:
+            grid[row][col]["event"] = "~~~~"
+            grid[row][col]["type"] = "none"
+        else:
+            if parent.current_type is None:
+                print("タイプ選択してね")
+                return
+            grid[row][col]["event"] = parent.current_type
+            grid[row][col]["type"] = parent.current_type
 
         self.refresh()
+
+    # ===== マウス押下 =====
+    def mousePressEvent(self, event):
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return
+
+        row = index.row()
+        col = index.column()
+
+        self.dragging = True
+
+        if event.button() == Qt.RightButton:
+            self.erase_mode = True
+        else:
+            self.erase_mode = False
+
+        self.apply_cell(row, col)
+
+        super().mousePressEvent(event)
+
+    # ===== マウス移動 =====
+    def mouseMoveEvent(self, event):
+        if not self.dragging:
+            return
+
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return
+
+        row = index.row()
+        col = index.column()
+
+        self.apply_cell(row, col)
+
+        super().mouseMoveEvent(event)
+
+    # ===== マウス離し =====
+    def mouseReleaseEvent(self, event):
+        self.dragging = False
+        super().mouseReleaseEvent(event)
 
 # ===== メインUI =====
 class MainWindow(QWidget):
