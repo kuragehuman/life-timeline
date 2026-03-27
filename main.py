@@ -105,6 +105,9 @@ class GridWindow(QTableWidget):
         row = index.row()
         col = index.column()
 
+        self.start_row = row
+        self.start_col = col
+
         self.dragging = True
 
         if event.button() == Qt.RightButton:
@@ -112,7 +115,7 @@ class GridWindow(QTableWidget):
         else:
             self.erase_mode = False
 
-        self.apply_cell(row, col)
+        # self.apply_cell(row, col)
 
         super().mousePressEvent(event)
 
@@ -128,12 +131,25 @@ class GridWindow(QTableWidget):
         row = index.row()
         col = index.column()
 
-        self.apply_cell(row, col)
+        # self.apply_cell(row, col)
 
         super().mouseMoveEvent(event)
 
     # ===== マウス離し =====
     def mouseReleaseEvent(self, event):
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return
+
+        # row = index.row()
+        end_col = index.column()
+
+        start = min(self.start_col, end_col)
+        end   = max(self.start_col, end_col)
+
+        for c in range(start, end + 1):
+            self.apply_cell(self.start_row, c)
+
         self.dragging = False
         super().mouseReleaseEvent(event)
 
