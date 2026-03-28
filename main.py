@@ -56,6 +56,8 @@ class GridWindow(QTableWidget):
         self.dragging = False
         self.erase_mode = False
 
+        self.preview_range = None  # (row, start, end)
+
         self.refresh()
 
         # シグナル
@@ -72,7 +74,15 @@ class GridWindow(QTableWidget):
 
                 item = QTableWidgetItem(text)
                 item.setTextAlignment(Qt.AlignCenter)
-                item.setBackground(TYPE_COLORS.get(t, QColor("#ffffff")))
+
+                base_color = TYPE_COLORS.get(t, QColor("#ffffff"))
+                # ===== プレビュー上書き =====
+                if self.preview_range:
+                    prow, start, end = self.preview_range
+                    if d == prow and start <= h <= end:
+                        base_color = QColor("#facc15")  # 黄色
+
+                item.setBackground(base_color)
 
                 self.setItem(d, h, item)
 
@@ -128,15 +138,22 @@ class GridWindow(QTableWidget):
         if not index.isValid():
             return
 
-        row = index.row()
-        col = index.column()
+        end_col = index.column()
 
-        # self.apply_cell(row, col)
+        start = min(self.start_col, end_col)
+        end   = max(self.start_col, end_col)
+
+        self.preview_range = (self.start_row, start, end)
+
+        self.refresh()  # ← プレビュー更新
 
         super().mouseMoveEvent(event)
 
     # ===== マウス離し =====
     def mouseReleaseEvent(self, event):
+
+        self.preview_range = None
+
         index = self.indexAt(event.pos())
         if not index.isValid():
             return
