@@ -1,9 +1,11 @@
 import sys
 import threading
+import json
 
 from PySide6.QtWidgets import (
     QApplication, QTableWidget, QTableWidgetItem,
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QFileDialog, QToolBar
 )
 from PySide6.QtCore import Qt, Signal, QObject
 from PySide6.QtGui import QColor
@@ -194,11 +196,53 @@ class MainWindow(QWidget):
 
         layout.addLayout(btn_layout)
 
+        # ツールバー
+        toolbar = QToolBar()
+
+        save_btn = QPushButton("保存")
+        load_btn = QPushButton("読み込み")
+
+        save_btn.clicked.connect(self.save_file)
+        load_btn.clicked.connect(self.load_file)
+
+        toolbar.addWidget(save_btn)
+        toolbar.addWidget(load_btn)
+
+        layout.addWidget(toolbar)        
+
         self.setLayout(layout)
 
     def select_type(self, type_):
         self.current_type = type_
         print(f"選択中: {type_}")
+    
+    def save_file(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self, "保存", "", "JSON Files (*.json)"
+        )
+        if not path:
+            return
+
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(grid, f, ensure_ascii=False, indent=2)
+
+        print("保存した:", path)
+
+    def load_file(self):
+        global grid
+
+        path, _ = QFileDialog.getOpenFileName(
+            self, "読み込み", "", "JSON Files (*.json)"
+        )
+        if not path:
+            return
+
+        with open(path, "r", encoding="utf-8") as f:
+            grid = json.load(f)
+
+        bridge.update_signal.emit()
+        print("読み込んだ:", path)
+        
 
 # ===== ロジック =====
 def add_event(day_str, start, end, name, type_):
