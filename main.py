@@ -23,9 +23,9 @@ grid = create_grid()
 
 # ===== 色 =====
 TYPE_COLORS = {
-    "sleep": QColor("#a78bfa"),
-    "work": QColor("#60a5fa"),
-    "eat": QColor("#34d399"),
+    "睡眠": QColor("#a78bfa"),
+    "作業": QColor("#60a5fa"),
+    "食事": QColor("#34d399"),
     "none": QColor("#ffffff")
 }
 
@@ -189,7 +189,7 @@ class MainWindow(QWidget):
         # ボタン
         btn_layout = QHBoxLayout()
 
-        for name in ["sleep", "work", "eat"]:
+        for name in ["睡眠", "作業", "食事"]:
             btn = QPushButton(name)
             btn.clicked.connect(lambda _, n=name: self.select_type(n))
             btn_layout.addWidget(btn)
@@ -271,36 +271,12 @@ def add_event(day_str, start, end, name, type_):
 
     bridge.update_signal.emit()
 
-# ===== コンソール入力 =====
-def console_loop():
-    print("コマンド入力: add Mon 9 12 work study")
-
-    while True:
-        cmd = input(">>> ").strip()
-
-        if cmd == "exit":
-            break
-
-        elif cmd.startswith("add"):
-            parts = cmd.split()
-
-            if len(parts) < 6:
-                print("形式: add Mon 9 12 work study")
-                continue
-
-            _, day, start, end, name, type_ = parts[:6]
-            add_event(day, start, end, name, type_)
-
 # ===== 実行 =====
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     window = MainWindow()
-    window.resize(1260, 450)
+    window.resize(1300, 450)
     window.show()
-
-    # コンソール入力（別スレッド）
-    thread = threading.Thread(target=console_loop, daemon=True)
-    thread.start()
 
     sys.exit(app.exec())
