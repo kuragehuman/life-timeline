@@ -136,18 +136,15 @@ class GridWindow(QTableWidget):
         if not self.dragging:
             return
 
-        index = self.indexAt(event.pos())
-        if not index.isValid():
-            return
-
-        end_col = index.column()
+        x = event.pos().x()
+        end_col = self.get_col_from_x(x)
 
         start = min(self.start_col, end_col)
         end   = max(self.start_col, end_col)
 
         self.preview_range = (self.start_row, start, end)
 
-        self.refresh()  # ← プレビュー更新
+        self.refresh()
 
         super().mouseMoveEvent(event)
 
@@ -156,12 +153,8 @@ class GridWindow(QTableWidget):
 
         self.preview_range = None
 
-        index = self.indexAt(event.pos())
-        if not index.isValid():
-            return
-
-        # row = index.row()
-        end_col = index.column()
+        x = event.pos().x()
+        end_col = self.get_col_from_x(x)
 
         start = min(self.start_col, end_col)
         end   = max(self.start_col, end_col)
@@ -169,8 +162,21 @@ class GridWindow(QTableWidget):
         for c in range(start, end + 1):
             self.apply_cell(self.start_row, c)
 
+        self.preview_range = None
         self.dragging = False
+
         super().mouseReleaseEvent(event)
+    
+    def get_col_from_x(self, x):
+        col = self.columnAt(x)
+
+        if col == -1:
+            if x < 0:
+                return 0
+            else:
+                return self.columnCount() - 1
+
+        return col
 
 # ===== メインUI =====
 class MainWindow(QWidget):
@@ -242,8 +248,7 @@ class MainWindow(QWidget):
 
         bridge.update_signal.emit()
         print("読み込んだ:", path)
-        
-
+    
 # ===== ロジック =====
 def add_event(day_str, start, end, name, type_):
     if day_str not in DAYS:
